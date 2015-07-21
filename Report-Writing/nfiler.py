@@ -548,7 +548,7 @@ class nessus_parser:
 
             # Sort vulnerabilities by CVSS score
             for vuln in sorted(self._results[host][1:], key=lambda cvss: float(cvss['cvss_base_score']), reverse=True):
-                info = info[0:4]
+                info = info[0:2]
                 cvss = vuln['cvss_base_score']
                 if cvss is not "":
                     # Apply ONLY_LOCAL filter
