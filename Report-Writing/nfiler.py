@@ -4,10 +4,7 @@
 """
 Copyright notice
 ================
-
-Copyright (C) 2015
-
- This program is based on YANP by Alessandro Di Pinto <alessandro.dipinto@security.dico.unimi.it>
+ Copyright (C) 2015
  This program is free software: you can redistribute it and/or modify it under
  the terms of the GNU General Public License as published by the Free Software
  Foundation, either version 3 of the License, or (at your option) any later
@@ -622,7 +619,7 @@ if __name__ == "__main__":
     # Arguments parser
     cmdline = ArgumentParser(description="%s performs information extraction from .nessus files and creates a customized output. (Compatible with Nessus v5 release)" % PROG_NAME,
                              version=PROG_VER,
-                             epilog="Originally Developed by Alessandro Di Pinto, updated by Peter Bassill"
+                             epilog="by the Hedgehogs..."
                              )
     cmdline.add_argument("-i",
                          metavar="[dir|.nessus]",
