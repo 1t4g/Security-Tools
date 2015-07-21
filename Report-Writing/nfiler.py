@@ -534,8 +534,8 @@ class nessus_parser:
             "VULNERABILITY DESCRIPTION",
             "REMEDIATION",
             "CVSS VECTOR",
-            "OPERATING SYSTEM",
-            "HOSTNAME"
+            "HOSTNAME",
+            "OPERATING SYSTEM"
         ])
 
         # Loop hosts
