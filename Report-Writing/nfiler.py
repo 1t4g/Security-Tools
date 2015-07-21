@@ -62,8 +62,8 @@ class nessus_parser:
         service_name       'generic service name'
         cvss_base_score:   'CVSS score to format X.Y'
         cvss_vector:       'CVSS vector'
-        exploit_available: 'true o false'
-        metasploit:        'true o false'
+        exploit_available: 'true /// false'
+        metasploit:        'true /// false'
         cve:               'CVE, if it exists'
     }
     """
