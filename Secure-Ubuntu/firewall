@@ -1,0 +1,176 @@
+#!/bin/sh
+IPT=`which iptables`
+IP6T=`which ip6tables`
+ADMIN="127.0.0.1 83.222.249.46 83.222.241.113"
+DNS_SERVER="8.8.4.4 8.8.8.8"
+PACKAGE_SERVER="gb.archive.ubuntu.com security.ubuntu.com packages.elasticstack.com"
+CLOUDFLAREV4="103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 104.16.0.0/12 108.162.192.0/18 141.101.64.0/18 162.158.0.0/15 172.64.0.0/13 173.245.48.0/20 188.114.96.0/20 190.93.240.0/20 197.234.240.0/22 198.41.128.0/17 199.27.128.0/21"
+CLOUDFLAREV6="2400:cb00::/32 2405:8100::/32 2405:b500::/32 2606:4700::/32 2803:f800::/32"
+INTERNAL="192.168.254.0/24"
+echo "Enabling Firewall"
+
+echo "flush iptable rules"
+$IPT -F
+$IPT -X
+$IPT -t nat -F
+$IPT -t nat -X
+$IPT -t mangle -F
+$IPT -t mangle -X
+ 
+echo "Set default policy to 'DROP'"
+$IPT -P INPUT DROP
+$IPT -P OUTPUT DROP
+$IPT -P FORWARD DROP
+$IP6T -P INPUT DROP
+$IP6T -P OUTPUT DROP
+$IP6T -P FORWARD DROP
+
+#######################################################################################################
+## Kill RFC 1918 Addresses
+echo "RFC 1918 Addresses"
+$IPT -A INPUT -s 10.0.0.0/8     -j DROP
+$IPT -A INPUT -s 169.254.0.0/16 -j DROP
+$IPT -A INPUT -s 172.16.0.0/12  -j DROP
+$IPT -A INPUT -s 127.0.0.0/8    -j DROP
+$IPT -A INPUT -s 224.0.0.0/4      -j DROP
+$IPT -A INPUT -d 224.0.0.0/4      -j DROP
+$IPT -A INPUT -s 240.0.0.0/5      -j DROP
+$IPT -A INPUT -d 240.0.0.0/5      -j DROP
+$IPT -A INPUT -s 0.0.0.0/8        -j DROP
+$IPT -A INPUT -d 0.0.0.0/8        -j DROP
+$IPT -A INPUT -d 239.255.255.0/24 -j DROP
+$IPT -A INPUT -d 255.255.255.255  -j DROP
+
+#######################################################################################################
+## Kill Bogus Packets
+echo "Kill Bogus Packets"
+$IPT -A INPUT   -m state --state INVALID -j DROP
+$IPT -A FORWARD -m state --state INVALID -j DROP
+$IPT -A OUTPUT  -m state --state INVALID -j DROP
+$IPT -A INPUT -p tcp -m tcp --tcp-flags SYN,FIN SYN,FIN -j DROP
+$IPT -A INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+
+#######################################################################################################
+## Kill specific ICMP packets
+echo "Kill ICMP"
+$IPT -A INPUT -p icmp -m icmp --icmp-type address-mask-request -j DROP
+$IPT -A INPUT -p icmp -m icmp --icmp-type timestamp-request -j DROP
+$IPT -A INPUT -p icmp -m icmp --icmp-type timestamp-reply -j DROP
+$IPT -A INPUT -p icmp -m limit --limit 1/second -j ACCEPT 
+
+#######################################################################################################
+## Prevent SYN Flood
+echo "Prevent SYN Flood"
+$IPT -A INPUT -m state --state NEW -p tcp -m tcp --syn -m recent --name synflood --set
+$IPT -A INPUT -m state --state NEW -p tcp -m tcp --syn -m recent --name synflood --update --seconds 1 --hitcount 60 -j DROP
+
+#######################################################################################################
+## Prevent RST Flood
+echo "Prevent RST Flood"
+$IPT -A INPUT -p tcp -m tcp --tcp-flags RST RST -m limit --limit 2/second --limit-burst 2 -j ACCEPT
+
+#######################################################################################################
+## Prevent Portscanners and VulnScanners from Enumerating us
+echo "Drop Portscanners"
+#$IPT -A INPUT   -m recent --name portscan --rcheck --seconds 86400 -j LOG --log-prefix "Portscan:"
+#$IPT -A INPUT   -m recent --name portscan --rcheck --seconds 86400 -j DROP
+#$IPT -A FORWARD -m recent --name portscan --rcheck --seconds 86400 -j DROP
+#$IPT -A FORWARD -m recent --name portscan --rcheck --seconds 86400 -j LOG --log-prefix "Portscan:"
+
+#######################################################################################################
+## Permit connection tracks
+echo "Add State"
+$IPT -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+$IPT -A OUTPUT -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+$IP6T -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+$IP6T -A OUTPUT -m conntrack --ctstate NEW,RELATED,ESTABLISHED -j ACCEPT
+
+#######################################################################################################
+## Permit SSH from the Admin servers
+echo "Permit SSH from Admin Servers"
+for ip in $ADMIN;
+	do
+	$IPT -A INPUT -p tcp -s $ip --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+done
+
+#######################################################################################################
+## Permit HTTP traffic from Cloudflare and Internal Only
+for ip in $CLOUDFLAREV4
+do
+	echo "Allowing HTTP (tcp port 80,443) to server '$ip'"
+	$IPT -A INPUT -p tcp -d $ip --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IPT -A INPUT -p tcp -s $ip --dport 433 -m state --state NEW,ESTABLISHED     -j ACCEPT
+done
+
+for ip in $CLOUDFLAREV6
+do
+	echo "Allowing HTTP (tcp port 80,443) to server '$ip'"
+	$IP6T -A INPUT -p tcp -d $ip --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IP6T -A INPUT -p tcp -s $ip --dport 433 -m state --state NEW,ESTABLISHED     -j ACCEPT
+done
+
+for ip in $INTERNAL
+do
+	echo "Allowing HTTP (tcp port 80,443) to server '$ip'"
+	$IPT -A INPUT -p tcp -d $ip --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IPT -A INPUT -p tcp -s $ip --dport 433 -m state --state NEW,ESTABLISHED     -j ACCEPT
+done
+
+#######################################################################################################
+## Permit DNS traffic
+for ip in $DNS_SERVER
+do
+	echo "Allowing DNS lookups (tcp, udp port 53) to server '$ip'"
+	$IPT -A OUTPUT -p udp -d $ip --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IPT -A INPUT  -p udp -s $ip --sport 53 -m state --state ESTABLISHED     -j ACCEPT
+	$IPT -A OUTPUT -p tcp -d $ip --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IPT -A INPUT  -p tcp -s $ip --sport 53 -m state --state ESTABLISHED     -j ACCEPT
+done
+
+#######################################################################################################
+## Global loopback iptable rules. Not IP specific
+echo "Permit loopback"
+$IPT -A INPUT -i lo -j ACCEPT
+$IPT -A OUTPUT -o lo -j ACCEPT
+$IP6T -A INPUT -i lo -j ACCEPT
+$IP6T -A OUTPUT -o lo -j ACCEPT
+
+#######################################################################################################
+## Package Server for Updates
+
+for ip in $PACKAGE_SERVER
+do
+	echo "Allow connection to '$ip' on port 80"
+	$IPT -A OUTPUT -p tcp -d "$ip" --dport 80  -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IPT -A INPUT  -p tcp -s "$ip" --sport 80  -m state --state ESTABLISHED     -j ACCEPT
+ 
+	echo "Allow connection to '$ip' on port 443"
+	$IPT -A OUTPUT -p tcp -d "$ip" --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
+	$IPT -A INPUT  -p tcp -s "$ip" --sport 443 -m state --state ESTABLISHED     -j ACCEPT
+done
+
+#######################################################################################################
+## Global iptable rules. Not IP specific
+ 
+echo "Allowing new and established incoming connections to port 22"
+$IPT -A INPUT  -p tcp -m multiport --dports 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+$IPT -A OUTPUT -p tcp -m multiport --sports 22 -m state --state ESTABLISHED     -j ACCEPT
+ 
+echo "Allow all outgoing connections to port 22"
+$IPT -A OUTPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+$IPT -A INPUT  -p tcp --sport 22 -m state --state ESTABLISHED     -j ACCEPT
+ 
+echo "Allow outgoing icmp connections (pings,...)"
+$IPT -A OUTPUT -p icmp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+$IPT -A INPUT  -p icmp -m state --state ESTABLISHED,RELATED     -j ACCEPT
+ 
+echo "Allow outgoing connections to port 123 (ntp syncs)"
+$IPT -A OUTPUT -p udp --dport 123 -m state --state NEW,ESTABLISHED -j ACCEPT
+$IPT -A INPUT  -p udp --sport 123 -m state --state ESTABLISHED     -j ACCEPT
+ 
+# Log before dropping
+$IPT -A INPUT  -j LOG  -m limit --limit 12/min --log-level 4 --log-prefix 'IP INPUT drop: '
+$IPT -A INPUT  -j DROP
+ 
+$IPT -A OUTPUT -j LOG  -m limit --limit 12/min --log-level 4 --log-prefix 'IP OUTPUT drop: '
+$IPT -A OUTPUT -j DROP
