@@ -545,7 +545,6 @@ class nessus_parser:
             info.append(counter_id)
             # IP
             info.append(host)
-
             # Sort vulnerabilities by CVSS score
             for vuln in sorted(self._results[host][1:], key=lambda cvss: float(cvss['cvss_base_score']), reverse=True):
                 info = info[0:2]
@@ -561,40 +560,47 @@ class nessus_parser:
                             counter_local += 1
                         else:
                             counter_remote += 1
-                        # CVSS SCORE
-                        info.append(cvss)
-                        # CVE
-                        info.append(vuln['cve'])
-                        # PORT
-                        port = vuln['port']
-                        if port == "0":
-                            port = "---"
-                        info.append(port)
-                        # PROTOCOL
-                        info.append(vuln['protocol'])
-                        # VULN NAME
-                        info.append(vuln['plugin_name'])
-                        # VULN DESC
-                        info.append(vuln['description'])
-                        # REMEDIATION
-                        info.append(vuln['solution'])
-                        # CVSS VECTOR (Remove 'CVSS#' preamble)
-                        vector = vuln['cvss_vector']
-                        if vector.find("#") != -1:
-                            vector = vector.split("#")
-                            if len(vector) > 1:
-                                vector = vector[1]
-                            else:
-                                vector = vuln['cvss_vector']
-                        info.append(vector)
-                        # HOSTNAME
-                        info.append(self._results[host][0]['hostname'])
-                        # OS
-                        info.append(self._results[host][0]['os'])
-                        writer.writerow([item.encode("utf-8") if isinstance(item, basestring) else item for item in info])
-                        counter_vulns += 1
-                        counter_id += 1
-                        info[0] = counter_id
+                    # CVSS SCORE
+                    info.append(cvss)
+                    # CVE
+                    info.append(vuln['cve'])
+                    # PORT
+                    port = vuln['port']
+                    if port == "0":
+                        port = "---"
+                    info.append(port)
+                    # PROTOCOL
+                    info.append(vuln['protocol'])
+                    # VULN NAME
+                    vector = vuln['plugin_name']
+		    if vector.find("(uncredentialed check)") != -1:
+                        vector = vector.split("(uncredentialed check)")
+                        if len(vector) > 1:
+                            vector = vector[0]
+                        else:
+                            vector = vuln['plugin_name']
+                    info.append(vector)
+                    # VULN DESC
+                    info.append(vuln['description'])
+                    # REMEDIATION
+                    info.append(vuln['solution'])
+                    # CVSS VECTOR (Remove 'CVSS#' preamble)
+                    vector = vuln['cvss_vector']
+                    if vector.find("#") != -1:
+                        vector = vector.split("#")
+                        if len(vector) > 1:
+                            vector = vector[1]
+                        else:
+                            vector = vuln['cvss_vector']
+                    info.append(vector)
+                    # HOSTNAME
+                    info.append(self._results[host][0]['hostname'])
+                    # OS
+                    info.append(self._results[host][0]['os'])
+                    writer.writerow([item.encode("utf-8") if isinstance(item, basestring) else item for item in info])
+                    counter_vulns += 1
+                    counter_id += 1
+                    info[0] = counter_id
 
         # Print reports parsed
         print "[*] Information extracted from:"
