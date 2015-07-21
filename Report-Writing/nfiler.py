@@ -563,15 +563,6 @@ class nessus_parser:
                             counter_remote += 1
                         # CVSS SCORE
                         info.append(cvss)
-                        # CVSS VECTOR (Remove 'CVSS#' preamble)
-                        vector = vuln['cvss_vector']
-                        if vector.find("#") != -1:
-                            vector = vector.split("#")
-                            if len(vector) > 1:
-                                vector = vector[1]
-                            else:
-                                vector = vuln['cvss_vector']
-                        info.append(vector)
                         # CVE
                         info.append(vuln['cve'])
                         # PORT
@@ -587,6 +578,15 @@ class nessus_parser:
                         info.append(vuln['description'])
                         # REMEDIATION
                         info.append(vuln['solution'])
+                        # CVSS VECTOR (Remove 'CVSS#' preamble)
+                        vector = vuln['cvss_vector']
+                        if vector.find("#") != -1:
+                            vector = vector.split("#")
+                            if len(vector) > 1:
+                                vector = vector[1]
+                            else:
+                                vector = vuln['cvss_vector']
+                        info.append(vector)
                         # HOSTNAME
                         info.append(self._results[host][0]['hostname'])
                         # OS
