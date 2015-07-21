@@ -78,7 +78,7 @@ class nessus_parser:
     _filter_ip       =    ''
     _xml_source      =    ''
     # Max CVSS score for low vulns
-    _CVSS_LOW        =    3.9
+    _CVSS_LOW        =    2.9
     # Min CVSS score for high vulns
     _CVSS_HIGH       =    7.0
     # Plugin Types
@@ -431,7 +431,7 @@ class nessus_parser:
             else:
                 print "%s %s" % (host, self._results[host][0]['hostname'])
 
-    def print_org_format(self, cvss_min='4.0', cvss_max='10.0'):
+    def print_org_format(self, cvss_min='2.9', cvss_max='10.0'):
         """
         Print to standard output extracted information in '.org' format (Emacs)
         """
@@ -508,7 +508,7 @@ class nessus_parser:
                         if cve is not '':
                             print "\tCVE %s" % cve
 
-    def save_csv_report(self, filename, cvss_min='4.0', cvss_max='10.0', only_local=False, delim=','):
+    def save_csv_report(self, filename, cvss_min='2.9', cvss_max='10.0', only_local=False, delim=','):
         """
         Save extracted information into csv file format
         """
