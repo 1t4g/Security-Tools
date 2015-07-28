@@ -5,13 +5,13 @@
 Copyright notice
 ================
  Copyright (C) 2015
- This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License 
- as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify it under t                                                                                                                                                             he terms of the GNU General Public License
+ as published by the Free Software Foundation, either version 3 of the License,                                                                                                                                                              or (at your option) any later version.
 
- Nessus File Report (nfiler) is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the 
- implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ Nessus File Report (nfiler) is distributed in the hope that it will be useful,                                                                                                                                                              but WITHOUT ANY WARRANTY; without even the
+ implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See t                                                                                                                                                             he GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License along with th                                                                                                                                                             is program. If not, see <http://www.gnu.org/licenses/>.
 """
 
 from argparse import ArgumentParser
@@ -158,22 +158,22 @@ class nessus_parser:
 
                         # Extract generic information
                         if properties.getAttribute('name') == 'HOST_START':
-                            item_info['scan_start'] = properties.childNodes[0].nodeValue
+                            item_info['scan_start'] = properties.childNodes[0].n                                                                                                                                                             odeValue
 
                         if properties.getAttribute('name') == 'HOST_END':
-                            item_info['scan_stop'] = properties.childNodes[0].nodeValue
+                            item_info['scan_stop'] = properties.childNodes[0].no                                                                                                                                                             deValue
 
-                        if properties.getAttribute('name') == 'operating-system':
+                        if properties.getAttribute('name') == 'operating-system'                                                                                                                                                             :
                             item_info['os'] = properties.childNodes[0].nodeValue
 
                         if properties.getAttribute('name') == 'host-fqdn':
-                            item_info['hostname'] = properties.childNodes[0].nodeValue
+                            item_info['hostname'] = properties.childNodes[0].nod                                                                                                                                                             eValue
 
                         if properties.getAttribute('name') == 'netbios-name':
-                            item_info['netbios_name'] = properties.childNodes[0].nodeValue
+                            item_info['netbios_name'] = properties.childNodes[0]                                                                                                                                                             .nodeValue
 
                         if properties.getAttribute('name') == 'mac-address':
-                            item_info['mac_address'] = properties.childNodes[0].nodeValue
+                            item_info['mac_address'] = properties.childNodes[0].                                                                                                                                                             nodeValue
 
                     # Add information extracted to data structure
                     self._results[ip].append(item_info)
@@ -217,28 +217,28 @@ class nessus_parser:
                     # Extract detailed vulnerability information
                     for details in item.childNodes:
                         if details.nodeName == 'description':
-                            vuln['description'] = details.childNodes[0].nodeValue
+                            vuln['description'] = details.childNodes[0].nodeValu                                                                                                                                                             e
 
                         if details.nodeName == 'solution':
                             vuln['solution'] = details.childNodes[0].nodeValue
 
                         if details.nodeName == 'plugin_type':
-                            vuln['plugin_type'] = details.childNodes[0].nodeValue
+                            vuln['plugin_type'] = details.childNodes[0].nodeValu                                                                                                                                                             e
 
                         if details.nodeName == 'cvss_base_score':
-                            vuln['cvss_base_score'] = details.childNodes[0].nodeValue
+                            vuln['cvss_base_score'] = details.childNodes[0].node                                                                                                                                                             Value
 
                         if details.nodeName == 'cvss_vector':
-                            vuln['cvss_vector'] = details.childNodes[0].nodeValue
+                            vuln['cvss_vector'] = details.childNodes[0].nodeValu                                                                                                                                                             e
 
-                        if details.nodeName == 'exploitability_ease' or details.nodeName == 'exploit_available':
-                            if details.childNodes[0].nodeValue.find('true') >= 0 or details.childNodes[0].nodeValue.find('Exploits are available') >= 0:
+                        if details.nodeName == 'exploitability_ease' or details.                                                                                                                                                             nodeName == 'exploit_available':
+                            if details.childNodes[0].nodeValue.find('true') >= 0                                                                                                                                                              or details.childNodes[0].nodeValue.find('Exploits are available') >= 0:
                                 vuln['exploit_available'] = 'true'
                             else:
                                 vuln['exploit_available'] = 'false'
 
                         if details.nodeName == 'exploit_framework_metasploit':
-                            if details.childNodes[0].nodeValue.find('true') >= 0:
+                            if details.childNodes[0].nodeValue.find('true') >= 0                                                                                                                                                             :
                                 vuln['metasploit'] = 'true'
                                 vuln['exploit_available'] = 'true'
                             else:
@@ -282,7 +282,7 @@ class nessus_parser:
             for vuln in self._results[host][1:]:
 
                 if vuln['plugin_id'] == pluginid:
-                    print "%s:%s %s" % (host, vuln['port'], self._results[host][0]['hostname'])
+                    print "%s:%s %s" % (host, vuln['port'], self._results[host][                                                                                                                                                             0]['hostname'])
 
     def find_by_plugin_name(self, plugin_descr):
         """
@@ -293,7 +293,7 @@ class nessus_parser:
             host = str(host) # From IPAddress to string
             for vuln in self._results[host][1:]:
                 if vuln['plugin_name'].lower().find(plugin_descr) >= 0:
-                    print "%s:%s [ID %s] %s" % (host, vuln['port'], vuln['plugin_id'], vuln['plugin_name'])
+                    print "%s:%s [ID %s] %s" % (host, vuln['port'], vuln['plugin                                                                                                                                                             _id'], vuln['plugin_name'])
 
     def print_statistics(self):
         """
@@ -340,8 +340,8 @@ class nessus_parser:
                         if vuln['plugin_id'] not in vuln_info_uniq:
                             vuln_info_uniq.append(vuln['plugin_id'])
                         # Add uniq vuln (host)
-                        if vuln['plugin_id'] not in targets[host]['vuln_info_uniq']:
-                            targets[host]['vuln_info_uniq'].append(vuln['plugin_id'])
+                        if vuln['plugin_id'] not in targets[host]['vuln_info_uni                                                                                                                                                             q']:
+                            targets[host]['vuln_info_uniq'].append(vuln['plugin_                                                                                                                                                             id'])
                     else:
                         vuln_low += 1
                         targets[host]['vuln_low'] += 1
@@ -349,8 +349,8 @@ class nessus_parser:
                         if vuln['plugin_id'] not in vuln_low_uniq:
                             vuln_low_uniq.append(vuln['plugin_id'])
                         # Add uniq vuln (host)
-                        if vuln['plugin_id'] not in targets[host]['vuln_low_uniq']:
-                            targets[host]['vuln_low_uniq'].append(vuln['plugin_id'])
+                        if vuln['plugin_id'] not in targets[host]['vuln_low_uniq                                                                                                                                                             ']:
+                            targets[host]['vuln_low_uniq'].append(vuln['plugin_i                                                                                                                                                             d'])
                 elif cvss >= 7.0:
                     vuln_high += 1
                     targets[host]['vuln_high'] += 1
@@ -359,7 +359,7 @@ class nessus_parser:
                         vuln_high_uniq.append(vuln['plugin_id'])
                     # Add uniq vuln (host)
                     if vuln['plugin_id'] not in targets[host]['vuln_high_uniq']:
-                        targets[host]['vuln_high_uniq'].append(vuln['plugin_id'])
+                        targets[host]['vuln_high_uniq'].append(vuln['plugin_id']                                                                                                                                                             )
                 else:
                     vuln_med += 1
                     targets[host]['vuln_med'] += 1
@@ -377,10 +377,10 @@ class nessus_parser:
                         vuln_local_uniq.append(vuln['plugin_id'])
                     # Add uniq local vulnerability (host)
                     targets[host]['vuln_local'] += 1
-                    if vuln['plugin_id'] not in targets[host]['vuln_local_uniq']:
-                        targets[host]['vuln_local_uniq'].append(vuln['plugin_id'])
+                    if vuln['plugin_id'] not in targets[host]['vuln_local_uniq']                                                                                                                                                             :
+                        targets[host]['vuln_local_uniq'].append(vuln['plugin_id'                                                                                                                                                             ])
                 # Check for public exploit availability
-                if vuln['exploit_available'].find("true") >= 0 or vuln['metasploit'].find("true") >=0:
+                if vuln['exploit_available'].find("true") >= 0 or vuln['metasplo                                                                                                                                                             it'].find("true") >=0:
                     exploits += 1
                     # Add uniq exploit (global)
                     if vuln['plugin_id'] not in exploits_uniq:
@@ -405,8 +405,8 @@ class nessus_parser:
         print "#" * 8 + "    TARGETS   " + "#" * 8
         print ""
         for host in targets.keys():
-            total_vulns = targets[host]['vuln_high'] + targets[host]['vuln_med'] + targets[host]['vuln_low'] + targets[host]['vuln_info']
-            print "%s,%d,%d,%d,%d,%d,%d" % (host,(total_vulns),(targets[host]['vuln_high']),(targets[host]['vuln_med']),(targets[host]['vuln_low']),(targets[host]['vuln_info']),(targets[host]['exploits']))
+            total_vulns = targets[host]['vuln_high'] + targets[host]['vuln_med']                                                                                                                                                              + targets[host]['vuln_low'] + targets[host]['vuln_info']
+            print "%s,%d,%d,%d,%d,%d,%d" % (host,(total_vulns),(targets[host]['v                                                                                                                                                             uln_high']),(targets[host]['vuln_med']),(targets[host]['vuln_low']),(targets[hos                                                                                                                                                             t]['vuln_info']),(targets[host]['exploits']))
 
 
     def print_targets(self, fullinfo=False, delim='|'):
@@ -417,12 +417,12 @@ class nessus_parser:
             host = str(host) # From IPAddress to string
             if fullinfo:
                 print "%s%s%s%s%s%s%s%s%s%s%s%s%s" % (host, delim,
-                                             self._results[host][0]['hostname'], delim,
-                                             self._results[host][0]['netbios_name'], delim,
-                                             self._results[host][0]['os'], delim,
-                                             self._results[host][0]['scan_start'], delim,
-                                             self._results[host][0]['scan_stop'], delim,
-                                             self._results[host][0]['mac_address']
+                                             self._results[host][0]['hostname'],                                                                                                                                                              delim,
+                                             self._results[host][0]['netbios_nam                                                                                                                                                             e'], delim,
+                                             self._results[host][0]['os'], delim                                                                                                                                                             ,
+                                             self._results[host][0]['scan_start'                                                                                                                                                             ], delim,
+                                             self._results[host][0]['scan_stop']                                                                                                                                                             , delim,
+                                             self._results[host][0]['mac_address                                                                                                                                                             ']
                                              )
             else:
                 print "%s %s" % (host, self._results[host][0]['hostname'])
@@ -468,13 +468,13 @@ class nessus_parser:
 
 
             # Sort vulnerabilities by CVSS score
-            for vuln in sorted(self._results[host][1:], key=lambda cvss: float(cvss['cvss_base_score']), reverse=True) :
+            for vuln in sorted(self._results[host][1:], key=lambda cvss: float(c                                                                                                                                                             vss['cvss_base_score']), reverse=True) :
                 cvss = vuln['cvss_base_score']
                 if cvss is not "":
                     # Apply CVSS filter
-                    if float(cvss) >= float(cvss_min) and float(cvss) <= float(cvss_max):
+                    if float(cvss) >= float(cvss_min) and float(cvss) <= float(c                                                                                                                                                             vss_max):
                         # CVSS - Plugin name - Plugin ID
-                        print "*** TODO [CVSS %04s][%s] %s [ID: %s]" % (cvss, vuln['service_name'], vuln['plugin_name'], vuln['plugin_id'])
+                        print "*** TODO [CVSS %04s][%s] %s [ID: %s]" % (cvss, vu                                                                                                                                                             ln['service_name'], vuln['plugin_name'], vuln['plugin_id'])
                         # Port , Protocol
                         print "\tPort: %s/%s" % (vuln['port'], vuln['protocol'])
 
@@ -504,7 +504,7 @@ class nessus_parser:
                         if cve is not '':
                             print "\tCVE %s" % cve
 
-    def save_csv_report(self, filename, cvss_min='4.0', cvss_max='10.0', only_local=False, delim=','):
+    def save_csv_report(self, filename, cvss_min='4.0', cvss_max='10.0', only_lo                                                                                                                                                             cal=False, delim=','):
         """
         Save extracted information into csv file format
         """
@@ -521,6 +521,7 @@ class nessus_parser:
             "ID",
             "IP",
             "CVSS SCORE",
+            "RISK RATING",
             "CVE",
             "PORT", "PROTOCOL",
             "VULNERABILITY NAME",
@@ -539,15 +540,15 @@ class nessus_parser:
             # IP
             info.append(host)
             # Sort vulnerabilities by CVSS score
-            for vuln in sorted(self._results[host][1:], key=lambda cvss: float(cvss['cvss_base_score']), reverse=True):
+            for vuln in sorted(self._results[host][1:], key=lambda cvss: float(c                                                                                                                                                             vss['cvss_base_score']), reverse=True):
                 info = info[0:2]
                 cvss = vuln['cvss_base_score']
                 if cvss is not "":
                     # Apply ONLY_LOCAL filter
-                    if only_local == True and vuln['plugin_type'] != self._LOCAL:
+                    if only_local == True and vuln['plugin_type'] != self._LOCAL                                                                                                                                                             :
                         continue
                     # Apply CVSS filter
-                    if float(cvss) >= float(cvss_min) and float(cvss) <= float(cvss_max):
+                    if float(cvss) >= float(cvss_min) and float(cvss) <= float(c                                                                                                                                                             vss_max):
                         # Statistics
                         if vuln['plugin_type'] == self._LOCAL:
                             counter_local += 1
@@ -555,18 +556,30 @@ class nessus_parser:
                             counter_remote += 1
                     # CVSS SCORE
                     info.append(cvss)
+                    # Risk Score
+                    risk = cvss
+                    if risk < "4.0":
+                        risk = "Low"
+                    elif risk > "6.9":
+                        risk = "High"
+                    else:
+                        risk = "Medium"
+                    info.append(risk)
                     # CVE
+                    cve = vuln['cve']
+                    if cve == "":
+                        cve = "No CVE Listed"
                     info.append(vuln['cve'])
                     # PORT
                     port = vuln['port']
                     if port == "0":
-                        port = "---"
+                        port = "N/A"
                     info.append(port)
                     # PROTOCOL
                     info.append(vuln['protocol'])
                     # VULN NAME
                     vector = vuln['plugin_name']
-		    if vector.find("(uncredentialed check)") != -1:
+                    if vector.find("(uncredentialed check)") != -1:
                         vector = vector.split("(uncredentialed check)")
                         if len(vector) > 1:
                             vector = vector[0]
@@ -590,7 +603,7 @@ class nessus_parser:
                     info.append(self._results[host][0]['hostname'])
                     # OS
                     info.append(self._results[host][0]['os'])
-                    writer.writerow([item.encode("utf-8") if isinstance(item, basestring) else item for item in info])
+                    writer.writerow([item.encode("utf-8") if isinstance(item, ba                                                                                                                                                             sestring) else item for item in info])
                     counter_vulns += 1
                     counter_id += 1
                     info[0] = counter_id
@@ -613,33 +626,33 @@ class nessus_parser:
 if __name__ == "__main__":
 
     # Arguments parser
-    cmdline = ArgumentParser(description="%s performs information extraction from .nessus files and creates a customized output. (Compatible with Nessus v5 release)" % PROG_NAME,
+    cmdline = ArgumentParser(description="%s performs information extraction fro                                                                                                                                                             m .nessus files and creates a customized output. (Compatible with Nessus v5 rele                                                                                                                                                             ase)" % PROG_NAME,
                              version=PROG_VER,
                              epilog="by the Hedgehogs..."
                              )
     cmdline.add_argument("-i",
                          metavar="[dir|.nessus]",
-                         help="Report exported in .nessus format. If directory is specified, will be parsed all .nessus files found. (not recursive)",
+                         help="Report exported in .nessus format. If directory i                                                                                                                                                             s specified, will be parsed all .nessus files found. (not recursive)",
                          required=True,
                          )
     cmdline.add_argument("--org",
                          action="store_true",
                          default=False,
-                         help="Print results in .org format. CVSS filter will be applied.",
+                         help="Print results in .org format. CVSS filter will be                                                                                                                                                              applied.",
                          )
     cmdline.add_argument("--csv",
                          metavar="[filename]",
-                         help="Save results into csv report. CVSS filter will be applied.",
+                         help="Save results into csv report. CVSS filter will be                                                                                                                                                              applied.",
                          )
     cmdline.add_argument("--delim",
                          metavar="[delim]",
-                         help="Use custom delimiter value to split CSV information.",
+                         help="Use custom delimiter value to split CSV informati                                                                                                                                                             on.",
                          default=',',
                          )
     cmdline.add_argument("--local",
                          action="store_true",
                          default=False,
-                         help="Filter vulnerabilities only from local assessment. (applied in CSV report)",
+                         help="Filter vulnerabilities only from local assessment                                                                                                                                                             . (applied in CSV report)",
                          )
     cmdline.add_argument("--min-cvss",
                          metavar="[min]",
@@ -663,11 +676,11 @@ if __name__ == "__main__":
                          )
     cmdline.add_argument("-p",
                          metavar="[PluginID]",
-                         help="Print a list of targets vulnerable at specified Nessus PluginID",
+                         help="Print a list of targets vulnerable at specified N                                                                                                                                                             essus PluginID",
                          )
     cmdline.add_argument("-d",
                          metavar="[PluginName]",
-                         help="Print a list of targets vulnerable at specified Nessus Plugin name (case-insensitive)",
+                         help="Print a list of targets vulnerable at specified N                                                                                                                                                             essus Plugin name (case-insensitive)",
                          )
     cmdline.add_argument("--raw",
                          action="store_true",
@@ -679,7 +692,7 @@ if __name__ == "__main__":
     args = cmdline.parse_args()
 
     # If not operation required, exit.
-    if not args.org and not args.t and not args.raw and not args.p and not args.d and not args.s and not args.csv:
+    if not args.org and not args.t and not args.raw and not args.p and not args.                                                                                                                                                             d and not args.s and not args.csv:
         print "[!] No operation specified!"
         print ""
         # Show help
@@ -700,7 +713,7 @@ if __name__ == "__main__":
         parser.print_org_format(cvss_min=args.min_cvss, cvss_max=args.max_cvss)
     # Save into csv file
     if args.csv:
-        parser.save_csv_report(args.csv, cvss_min=args.min_cvss, cvss_max=args.max_cvss, only_local=args.local, delim=args.delim)
+        parser.save_csv_report(args.csv, cvss_min=args.min_cvss, cvss_max=args.m                                                                                                                                                             ax_cvss, only_local=args.local, delim=args.delim)
     # Print targets
     if args.t:
         parser.print_targets()
