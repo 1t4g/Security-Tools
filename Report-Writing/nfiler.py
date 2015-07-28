@@ -65,6 +65,8 @@ class nessus_parser:
         exploit_available: 'true /// false'
         metasploit:        'true /// false'
         cve:               'CVE, if it exists'
+        synopsis:          'synopsis'
+        plugin_output:     'plugin output'
     }
     """
     _results         =    None
@@ -201,6 +203,8 @@ class nessus_parser:
                         'exploit_available': '',
                         'metasploit':        '',
                         'cve':               '',
+                        'synopsis':          '',
+                        'plugin_output':     '',
                         }
 
                     # Extract generic vulnerability information
@@ -231,7 +235,13 @@ class nessus_parser:
                         if details.nodeName == 'cvss_vector':
                             vuln['cvss_vector'] = details.childNodes[0].nodeValue
 
-                        if details.nodeName == 'exploitability_ease' or details.nodeName == 'exploit_available':
+                        if details.nodeName == 'synposis':
+                            vuln['synopsis'] = details.childNodes[0].nodeValue
+
+                        if details.nodeName == 'plugin_output':
+                            vuln['plugin_output'] = details.childNodes[0].nodeValue
+
+                        if details.nodeName == 'exploitability_ease' or details.                                                                                                                                                             nodeName == 'exploit_available':
                             if details.childNodes[0].nodeValue.find('true') >= 0 or details.childNodes[0].nodeValue.find('Exploits are available') > 0:
                                 vuln['exploit_available'] = 'true'
                             else:
@@ -518,9 +528,10 @@ class nessus_parser:
             "CVE",
             "PORT", "PROTOCOL",
             "VULNERABILITY NAME",
-            "PATCH ID",
             "VULNERABILITY DESCRIPTION",
             "REMEDIATION",
+            "SYNOPSIS",
+            "OUTPUT",
             "CVSS VECTOR",
             "HOSTNAME",
             "OPERATING SYSTEM"
@@ -556,6 +567,8 @@ class nessus_parser:
                         risk = "Low"
                     elif risk > "6.9":
                         risk = "High"
+                    elif risk == "10.0":
+                        risk = "Critical"
                     else:
                         risk = "Medium"
                     info.append(risk)
@@ -579,18 +592,18 @@ class nessus_parser:
                             vector = vector[0]
                         else:
                             vector = vuln['plugin_name']
-                    if vector.find("-") != -1:
+                    if vector.find(":") != -1:
                         vector = vector.split(":")
                         if len(vector) > 1:
                             vector = vector[1]
                         else:
-                            vector = 'oops'
-                    if vector.find("(remote check)") != -1:
-                        vector = vector.split("(remote check)")
-                        if len(vector) > 1:
-                            vector = vector[0]
-                        else:
-                            vector = 'oops'
+                            vector = ''
+#                    if vector.find("(remote check)") != -1:
+#                        vector = vector.split("(remote check)")
+#                        if len(vector) > 1:
+#                            vector = vector[1]
+#                        else:
+#                            vector = ''
                     info.append(vector)
                     # MS PATCH
                     vector = vuln['plugin_name']
@@ -607,6 +620,10 @@ class nessus_parser:
                     info.append(vuln['description'])
                     # REMEDIATION
                     info.append(vuln['solution']+' '+patch)
+                    # SYNOPSIS
+                    info.append(vuln['synopsis'])
+                    # OUPUT
+                    info.append(vuln['plugin_output'])
                     # CVSS VECTOR (Remove 'CVSS#' preamble)
                     vector = vuln['cvss_vector']
                     if vector.find("#") != -1:
