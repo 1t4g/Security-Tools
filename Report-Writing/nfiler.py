@@ -67,6 +67,7 @@ class nessus_parser:
         cve:               'CVE, if it exists'
         synopsis:          'synopsis'
         plugin_output:     'plugin output'
+        risk_factor:       'risk_factor'
         vuln_publication_date: 'vulnerability publication date'
     }
     """
@@ -207,6 +208,7 @@ class nessus_parser:
                         'synopsis':          '',
                         'plugin_output':     '',
                         'see_also':          '',
+                        'risk_factor':       '',
                         'vuln_publication_date':        ''
                         }
 
@@ -244,7 +246,7 @@ class nessus_parser:
                         if details.nodeName == 'plugin_output':
                             vuln['plugin_output'] = details.childNodes[0].nodeValue
 
-                        if details.nodeName == 'exploitability_ease' or details.                                                                                                                                                             nodeName == 'exploit_available':
+                        if details.nodeName == 'exploitability_ease' or details.nodeName == 'exploit_available':
                             if details.childNodes[0].nodeValue.find('true') >= 0 or details.childNodes[0].nodeValue.find('Exploits are available') > 0:
                                 vuln['exploit_available'] = 'true'
                             else:
@@ -262,6 +264,9 @@ class nessus_parser:
 
                         if details.nodeName == 'see_also':
                             vuln['see_also'] = details.childNodes[0].nodeValue
+
+                        if details.nodeName == 'risk_factor':
+                            vuln['risk_factor'] = details.childNodes[0].nodeValue
 
                         if details.nodeName == 'vuln_publication_date':
                             vuln['vuln_publication_date'] = details.childNodes[0].nodeValue
@@ -545,7 +550,8 @@ class nessus_parser:
             "HOSTNAME",
             "OPERATING SYSTEM",
             "SEE ALSO",
-            "VULN DATE"
+            "VULN DATE",
+            "EXPLOIT AVAILABLE"
         ])
 
         # Loop hosts
@@ -573,18 +579,7 @@ class nessus_parser:
                     # CVSS SCORE
                     info.append(cvss)
                     # Risk Score
-                    risk = cvss
-                    if risk <= "1.0":
-                        risk = "Info"
-                    elif risk <= "3.0":
-                        risk = "Low"
-                    elif risk <= "6.9":
-                        risk = "Medium"
-                    elif risk <= "9.9":
-                        risk = "High"
-                    elif risk >= "10.0":
-                        risk = "Critial"
-                    info.append(risk)
+                    info.append(vuln['risk_factor'])
                     # CVE
                     cve = vuln['cve']
                     if cve == "":
@@ -611,12 +606,6 @@ class nessus_parser:
                             vector = vector[1]
                         else:
                             vector = ''
-#                    if vector.find("(remote check)") != -1:
-#                        vector = vector.split("(remote check)")
-#                        if len(vector) > 1:
-#                            vector = vector[1]
-#                        else:
-#                            vector = ''
                     info.append(vector)
                     # MS PATCH
                     vector = vuln['plugin_name']
@@ -665,6 +654,8 @@ class nessus_parser:
                     else:
                         vector = ''
                     info.append(vector)
+                    # EXPLOIT AVAILABLE
+                    info.append(vuln['exploit_available'])
                     # CONTINUE
                     writer.writerow([item.encode("utf-8") if isinstance(item, basestring) else item for item in info])
                     counter_vulns += 1
