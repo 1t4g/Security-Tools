@@ -67,6 +67,7 @@ class nessus_parser:
         cve:               'CVE, if it exists'
         synopsis:          'synopsis'
         plugin_output:     'plugin output'
+        vuln_publication_date: 'vulnerability publication date'
     }
     """
     _results         =    None
@@ -205,6 +206,8 @@ class nessus_parser:
                         'cve':               '',
                         'synopsis':          '',
                         'plugin_output':     '',
+                        'see_also':          '',
+                        'vuln_publication_date':        ''
                         }
 
                     # Extract generic vulnerability information
@@ -235,7 +238,7 @@ class nessus_parser:
                         if details.nodeName == 'cvss_vector':
                             vuln['cvss_vector'] = details.childNodes[0].nodeValue
 
-                        if details.nodeName == 'synposis':
+                        if details.nodeName == 'synopsis':
                             vuln['synopsis'] = details.childNodes[0].nodeValue
 
                         if details.nodeName == 'plugin_output':
@@ -256,6 +259,12 @@ class nessus_parser:
 
                         if details.nodeName == 'cve':
                             vuln['cve'] = details.childNodes[0].nodeValue
+
+                        if details.nodeName == 'see_also':
+                            vuln['see_also'] = details.childNodes[0].nodeValue
+
+                        if details.nodeName == 'vuln_publication_date':
+                            vuln['vuln_publication_date'] = details.childNodes[0].nodeValue
 
                     # Store information extracted
                     self._results[ip].append(vuln)
@@ -534,7 +543,9 @@ class nessus_parser:
             "OUTPUT",
             "CVSS VECTOR",
             "HOSTNAME",
-            "OPERATING SYSTEM"
+            "OPERATING SYSTEM",
+            "SEE ALSO",
+            "VULN DATE"
         ])
 
         # Loop hosts
@@ -563,14 +574,16 @@ class nessus_parser:
                     info.append(cvss)
                     # Risk Score
                     risk = cvss
-                    if risk < "4.0":
+                    if risk <= "1.0":
+                        risk = "Info"
+                    elif risk <= "3.0":
                         risk = "Low"
-                    elif risk > "6.9":
-                        risk = "High"
-                    elif risk == "10.0":
-                        risk = "Critical"
-                    else:
+                    elif risk <= "6.9":
                         risk = "Medium"
+                    elif risk <= "9.9":
+                        risk = "High"
+                    elif risk >= "10.0":
+                        risk = "Critial"
                     info.append(risk)
                     # CVE
                     cve = vuln['cve']
@@ -610,7 +623,7 @@ class nessus_parser:
                     if vector.find('-') != -1:
                         vector = vector.split(": ")
                         if len(vector) > 1:
-                           vector = 'Apply patch: '+vector[0]
+                           vector = 'Apply patch '+vector[0]
                         else:
                            vector = ' '
                     else:
@@ -619,7 +632,12 @@ class nessus_parser:
                     # VULN DESC
                     info.append(vuln['description'])
                     # REMEDIATION
-                    info.append(vuln['solution']+' '+patch)
+                    vector = vuln['solution']
+                    if vector.find('Microsoft has released a set of patches') != -1:
+                        vector = patch
+                    else:
+                        vector = vector
+                    info.append(vector)
                     # SYNOPSIS
                     info.append(vuln['synopsis'])
                     # OUPUT
@@ -637,6 +655,17 @@ class nessus_parser:
                     info.append(self._results[host][0]['hostname'])
                     # OS
                     info.append(self._results[host][0]['os'])
+                    # SEE ALSO
+                    info.append(vuln['see_also'])
+                    # VULN DATE
+                    vector = vuln['vuln_publication_date']
+                    vector = vector.split("/")
+                    if len(vector) > 1:
+                        vector = vector[2]+"/"+vector[1]+"/"+vector[0]
+                    else:
+                        vector = ''
+                    info.append(vector)
+                    # CONTINUE
                     writer.writerow([item.encode("utf-8") if isinstance(item, basestring) else item for item in info])
                     counter_vulns += 1
                     counter_id += 1
