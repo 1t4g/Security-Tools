@@ -1,6 +1,15 @@
 # Nessus Reporter
 Python script to read a .nessus file and output a .csv file for mailmerging into our template.
 
+FIXES
+ - Risk Rating of 10.0 was coming out as Low, now fixed
+ - Detection of published exploits now fixed and reporting correctly where there is a public exploit available
+ 
+FEATURES
+ - Added vulnerability publish date
+ - Added output synopsis
+ - Added validation of "futher info" (only works when online)
+
 v1.0 released
  - This is the first proper working version that will simply import into our reporting template.
 
