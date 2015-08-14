@@ -227,7 +227,7 @@ def download(sid, fid):
 
     data = connect('GET', '/scans/{0}/export/{1}/download'.format(sid, fid))
     filename = 'nessus_{0}_{1}.nessus'.format(sid, fid)
-
+ 
     print('Saving scan results to {0}.'.format(filename))
     with open(filename, 'w') as f:
         f.write(data)
